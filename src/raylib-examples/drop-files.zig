@@ -13,14 +13,18 @@ const file_path = struct {
 };
 
 pub fn run() !void {
-    @breakpoint();
+
+    // @breakpoint() // TODO: check why breakpoint corrupts stack
 
     const screenWidth = 800;
     const screenHeight = 450;
 
+    var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+    defer arena.deinit();
+
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
-    const allocator = gpa.allocator();
     defer if (gpa.deinit() == .leak) std.debug.print("LEAKING MEMORY!", .{});
+    const allocator = arena.allocator();
 
     rl.InitWindow(screenWidth, screenHeight, "raylib [core] example - drop files");
     defer rl.CloseWindow();

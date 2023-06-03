@@ -28,7 +28,9 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
 
+    exe.addIncludePath("libs/raygui/src");
     exe.addIncludePath("libs/raylib/src");
+
 
     exe.linkLibrary(raylib);
 
