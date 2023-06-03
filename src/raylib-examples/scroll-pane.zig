@@ -59,7 +59,6 @@ pub fn run() !void {
     var panelContentRec = rl.Rectangle{ .x = 0, .y = 0, .width = 340, .height = 340 };
 
     var panelView = rl.Rectangle{ .x = 0, .y = 0, .width = 0, .height = 0 };
-
     var panelScroll = rl.Vector2{ .x = -99, .y = -20 };
 
     var showContentArea = true;
