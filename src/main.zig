@@ -1,6 +1,6 @@
 const std = @import("std");
 
-const DEBUG = true;
+const DEBUG = false;
 
 // const basic_window = @import("raylib-examples/basic-window.zig");
 // const drop_files = @import("raylib-examples/drop-files.zig");
