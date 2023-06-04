@@ -24,16 +24,17 @@ pub fn run() !void {
     rl.InitWindow(screenWidth, screenHeight, "BlendImages");
     defer rl.CloseWindow();
 
+    const imagesPanel: rl.Rectangle = .{ .x = 552, .y = 24, .width = 240, .height = 480 };
+    var imagesPanelBoundsOffset = rl.Vector2{ .x = 4, .y = 4 };
+    var imagesPanelContentRec: rl.Rectangle = .{ .x = imagesPanel.x, .y = imagesPanel.y, .width = imagesPanel.width - imagesPanelBoundsOffset.x, .height = imagesPanel.height - imagesPanelBoundsOffset.y };
     var imagesPanelScrollView = rl.Rectangle{ .x = 0, .y = 0, .width = 0, .height = 0 };
     var imagesPanelScrollOffset = rl.Vector2{ .x = 0, .y = 0 };
-    var imagesPanelBoundsOffset = rl.Vector2{ .x = 0, .y = 0 };
 
-    const previewRect : rl.Rectangle = .{ .x = 24, .y = 24, .width = 504, .height = 480 };
-    const previewPanelRect: rl.Rectangle = .{ .x = 32, .y = 32, .width = 488, .height = 464 };
-    const imagesScollPanelRect: rl.Rectangle = .{ .x = 552, .y = 24, .width = 240, .height = 480 };
-    
-    // const imageRect: rl.Rectangle = .{ .x = 552, .y = 24, .width = 240, .height = 120 };
-    // var imagePanel: rl.Rectangle = .{ .x = 560, .y = 536, .width = 224, .height = 104 };
+    const previewBox: rl.Rectangle = .{ .x = 24, .y = 24, .width = 504, .height = 480 };
+    const previewPanel: rl.Rectangle = .{ .x = 32, .y = 32, .width = 488, .height = 464 };
+
+    const imageBox: rl.Rectangle = .{ .x = 12, .y = 12, .width = 216, .height = 120 };
+    var imagePanel: rl.Rectangle = .{ .x = 20, .y = 20, .width = 200, .height = 104 };
 
     rl.SetTargetFPS(60);
 
@@ -48,19 +49,42 @@ pub fn run() !void {
 
             rl.ClearBackground(rl.GetColor(@bitCast(u32, rl.GuiGetStyle(rl.DEFAULT, rl.BACKGROUND_COLOR))));
 
-            _ = rl.GuiGroupBox(previewRect, "Preview");
-            _ = rl.GuiScrollPanel(
-                .{ .x = 552, .y = 24, .width = 240 - imagesPanelBoundsOffset.x, .height = 480 - imagesPanelBoundsOffset.y },
-                null,
-                imagesScollPanelRect,
-                &imagesPanelScrollOffset,
-                &imagesPanelScrollView
-            );
-            
-            _ = rl.GuiPanel(previewPanelRect, null);
+            _ = rl.GuiGroupBox(previewBox, "Preview");
+            _ = rl.GuiPanel(previewPanel, null);
 
-            // _ = rl.GuiGroupBox(imageRect, "Image.extension");
-            // _ = rl.GuiPanel(imagePanel, null);
+            _ = rl.GuiScrollPanel(imagesPanel, null, imagesPanelContentRec, &imagesPanelScrollOffset, &imagesPanelScrollView);
+
+            {
+                rl.BeginScissorMode(
+                    @floatToInt(i32, imagesPanelContentRec.x),
+                    @floatToInt(i32, imagesPanelContentRec.y),
+                    @floatToInt(i32, imagesPanelContentRec.width),
+                    @floatToInt(i32, imagesPanelContentRec.height),
+                );
+
+                defer rl.EndScissorMode();
+
+                _ = rl.GuiGroupBox(.{
+                    .x = imageBox.x + imagesPanel.x + imagesPanelScrollOffset.x,
+                    .y = imageBox.y + imagesPanel.y + imagesPanelScrollOffset.y,
+                    .width = imageBox.width,
+                    .height = imageBox.height,
+                }, "ImageFileName.ext");
+                _ = rl.GuiPanel(.{
+                    .x = imagePanel.x + imagesPanel.x + imagesPanelScrollOffset.x,
+                    .y = imagePanel.y + imagesPanel.y + imagesPanelScrollOffset.y,
+                    .width = imagePanel.width,
+                    .height = imagePanel.height,
+                }, null);
+            }
+
+            rl.DrawRectangle(
+                @floatToInt(i32, imagesPanel.x + imagesPanelScrollOffset.x),
+                @floatToInt(i32, imagesPanel.y + imagesPanelScrollOffset.y),
+                @floatToInt(i32, imagesPanelContentRec.width),
+                @floatToInt(i32, imagesPanelContentRec.height),
+                rl.Fade(rl.RED, 0.1),
+            );
         }
     }
 }
