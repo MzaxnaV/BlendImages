@@ -9,7 +9,7 @@ const DEBUG = false;
 // const input_gestures = @import("raylib-examples/input-gestures.zig");
 // const image_drawing = @import("raylib-examples/image-drawing.zig");
 // const raw_data = @import("raylib-examples/raw-data.zig");
-const scroll_panel = @import("raylib-examples/scroll-pane.zig");
+// const scroll_panel = @import("raylib-examples/scroll-pane.zig");
 
 pub const rl = @cImport({
     @cInclude("raylib.h");
@@ -63,7 +63,7 @@ pub fn run() !void {
 
     var panel = images_panel{
         .size = .{ .x = 552, .y = 24, .width = 240, .height = 480 },
-        .contentSize = .{ .x = 552, .y = 24, .width = 240 - 4, .height = 480 - 4 },
+        .contentSize = .{ .x = 552, .y = 24, .width = 240 - 8, .height = 4 },
         .boxes = std.ArrayList(image_box).init(allocator),
         .scrollOffset = .{ .x = 0, .y = 0 },
         .scrollView = .{ .x = 0, .y = 0, .width = 0, .height = 0 },
@@ -93,6 +93,8 @@ pub fn run() !void {
                     box.panelOffset = .{ .x = panel.size.x, .y = panel.size.y };
 
                     _ = rl.TextCopy(box.filename[0..].ptr, droppedFiles.paths[i]);
+
+                    panel.contentSize.height += box.size.height + 8;
                 }
 
                 makeImageVisible = true;
@@ -112,10 +114,10 @@ pub fn run() !void {
 
             {
                 rl.BeginScissorMode(
-                    @floatToInt(i32, panel.contentSize.x),
-                    @floatToInt(i32, panel.contentSize.y),
-                    @floatToInt(i32, panel.contentSize.width),
-                    @floatToInt(i32, panel.contentSize.height),
+                    @floatToInt(i32, panel.size.x),
+                    @floatToInt(i32, panel.size.y + 1),
+                    @floatToInt(i32, panel.size.width - 12),
+                    @floatToInt(i32, panel.size.height - 14),
                 );
 
                 defer rl.EndScissorMode();
@@ -135,17 +137,19 @@ pub fn run() !void {
                 }
             }
 
-            rl.DrawRectangle(
-                @floatToInt(i32, panel.size.x + panel.scrollOffset.x),
-                @floatToInt(i32, panel.size.y + panel.scrollOffset.y),
-                @floatToInt(i32, panel.contentSize.width),
-                @floatToInt(i32, panel.contentSize.height),
-                rl.Fade(rl.RED, 0.1),
-            );
+            if (DEBUG) {
+                rl.DrawRectangle(
+                    @floatToInt(i32, panel.size.x + panel.scrollOffset.x),
+                    @floatToInt(i32, panel.size.y + panel.scrollOffset.y),
+                    @floatToInt(i32, panel.contentSize.width),
+                    @floatToInt(i32, panel.contentSize.height),
+                    rl.Fade(rl.RED, 0.1),
+                );
+            }
         }
     }
 }
 
 pub fn main() !void {
-    return if (DEBUG) scroll_panel.run() else run();
+    return run();
 }
