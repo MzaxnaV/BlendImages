@@ -19,43 +19,83 @@ pub const rl = @cImport({
 
 var filePath: [256]u8 = [1]u8{0} ** 256;
 
+const image_box = struct {
+    const offset = 8;
+
+    size: rl.Rectangle,
+    panelOffset: rl.Vector2,
+    filename: [256]u8,
+
+    fn draw(self: @This(), scolloffset: rl.Vector2) void {
+        _ = rl.GuiGroupBox(.{
+            .x = self.size.x + self.panelOffset.x + scolloffset.x,
+            .y = self.size.y + self.panelOffset.y + scolloffset.y,
+            .width = self.size.width,
+            .height = self.size.height,
+        }, self.filename[0..].ptr);
+        _ = rl.GuiPanel(.{
+            .x = self.size.x + offset + self.panelOffset.x + scolloffset.x,
+            .y = self.size.y + offset + self.panelOffset.y + scolloffset.y,
+            .width = self.size.width - 2 * offset,
+            .height = self.size.height - 2 * offset,
+        }, null);
+    }
+};
+
+const images_panel = struct {
+    size: rl.Rectangle,
+    contentSize: rl.Rectangle,
+    scrollOffset: rl.Vector2,
+    scrollView: rl.Rectangle,
+    boxes: std.ArrayList(image_box),
+};
+
 pub fn run() !void {
     const screenWidth = 816;
     const screenHeight = 528;
+
+    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
+    defer if (gpa.deinit() == .leak) std.debug.print("LEAKING MEMORY!", .{});
+    const allocator = gpa.allocator();
 
     var makeImageVisible = false;
 
     rl.InitWindow(screenWidth, screenHeight, "BlendImages");
     defer rl.CloseWindow();
 
-    const imagesPanel: rl.Rectangle = .{ .x = 552, .y = 24, .width = 240, .height = 480 };
-    var imagesPanelBoundsOffset = rl.Vector2{ .x = 4, .y = 4 };
-    var imagesPanelContentRec: rl.Rectangle = .{
-        .x = imagesPanel.x,
-        .y = imagesPanel.y,
-        .width = imagesPanel.width - imagesPanelBoundsOffset.x,
-        // .height = 4,
-        .height = imagesPanel.height - imagesPanelBoundsOffset.y,
+    var panel = images_panel{
+        .size = .{ .x = 552, .y = 24, .width = 240, .height = 480 },
+        .contentSize = .{ .x = 552, .y = 24, .width = 240 - 4, .height = 480 - 4 },
+        .boxes = std.ArrayList(image_box).init(allocator),
+        .scrollOffset = .{ .x = 0, .y = 0 },
+        .scrollView = .{ .x = 0, .y = 0, .width = 0, .height = 0 },
     };
-    var imagesPanelScrollView = rl.Rectangle{ .x = 0, .y = 0, .width = 0, .height = 0 };
-    var imagesPanelScrollOffset = rl.Vector2{ .x = 0, .y = 0 };
+    defer panel.boxes.deinit();
 
     const previewBox: rl.Rectangle = .{ .x = 24, .y = 24, .width = 504, .height = 480 };
     const previewPanel: rl.Rectangle = .{ .x = 32, .y = 32, .width = 488, .height = 464 };
-
-    const imageBox: rl.Rectangle = .{ .x = 12, .y = 12, .width = 216, .height = 120 };
-    var imagePanel: rl.Rectangle = .{ .x = 20, .y = 20, .width = 200, .height = 104 };
 
     rl.SetTargetFPS(60);
 
     while (!rl.WindowShouldClose()) {
         { // Update
             const mousePos = rl.GetMousePosition();
-            if (rl.CheckCollisionPointRec(mousePos, imagesPanel) and rl.IsFileDropped()) {
+            if (rl.CheckCollisionPointRec(mousePos, panel.size) and rl.IsFileDropped()) {
                 const droppedFiles = rl.LoadDroppedFiles();
                 defer rl.UnloadDroppedFiles(droppedFiles);
 
-                _ = rl.TextCopy(filePath[0..].ptr, droppedFiles.paths[0]);
+                for (0..droppedFiles.count) |_| {
+                    var box = try panel.boxes.addOne();
+                    box.size = .{
+                        .x = 12,
+                        .y = 12 + @intToFloat(f32, panel.boxes.items.len - 1) * 128,
+                        .width = 216,
+                        .height = 120,
+                    };
+                    box.panelOffset = .{ .x = panel.size.x, .y = panel.size.y };
+
+                    _ = rl.TextCopy(box.filename[0..].ptr, droppedFiles.paths[0]);
+                }
 
                 makeImageVisible = true;
             }
@@ -70,36 +110,29 @@ pub fn run() !void {
             _ = rl.GuiGroupBox(previewBox, "Preview");
             _ = rl.GuiPanel(previewPanel, null);
 
-            _ = rl.GuiScrollPanel(imagesPanel, null, imagesPanelContentRec, &imagesPanelScrollOffset, &imagesPanelScrollView);
+            _ = rl.GuiScrollPanel(panel.size, null, panel.contentSize, &panel.scrollOffset, &panel.scrollView);
 
             {
                 rl.BeginScissorMode(
-                    @floatToInt(i32, imagesPanelContentRec.x),
-                    @floatToInt(i32, imagesPanelContentRec.y),
-                    @floatToInt(i32, imagesPanelContentRec.width),
-                    @floatToInt(i32, imagesPanelContentRec.height),
+                    @floatToInt(i32, panel.contentSize.x),
+                    @floatToInt(i32, panel.contentSize.y),
+                    @floatToInt(i32, panel.contentSize.width),
+                    @floatToInt(i32, panel.contentSize.height),
                 );
 
                 defer rl.EndScissorMode();
 
                 if (makeImageVisible) {
-                    _ = rl.GuiGroupBox(.{
-                        .x = imageBox.x + imagesPanel.x + imagesPanelScrollOffset.x,
-                        .y = imageBox.y + imagesPanel.y + imagesPanelScrollOffset.y,
-                        .width = imageBox.width,
-                        .height = imageBox.height,
-                    }, filePath[0..].ptr);
-                    _ = rl.GuiPanel(.{
-                        .x = imagePanel.x + imagesPanel.x + imagesPanelScrollOffset.x,
-                        .y = imagePanel.y + imagesPanel.y + imagesPanelScrollOffset.y,
-                        .width = imagePanel.width,
-                        .height = imagePanel.height,
-                    }, null);
+                    for (panel.boxes.items) |box| {
+                        box.draw(panel.scrollOffset);
+                    }
+
+                    // panel.boxes.getLast().draw(panel.scrollOffset);
                 } else {
                     rl.DrawText(
                         "Drop your files\nTo this window!",
-                        @floatToInt(i32, 30 + imageBox.x + imagesPanel.x + imagesPanelScrollOffset.x),
-                        @floatToInt(i32, imagesPanel.height / 2 + imageBox.y + imagesPanel.y + imagesPanelScrollOffset.y - 40),
+                        @floatToInt(i32, 30 + panel.size.x + panel.scrollOffset.x),
+                        @floatToInt(i32, panel.size.height / 2 + panel.size.y + panel.scrollOffset.y - 40),
                         20,
                         rl.DARKGRAY,
                     );
@@ -107,10 +140,10 @@ pub fn run() !void {
             }
 
             rl.DrawRectangle(
-                @floatToInt(i32, imagesPanel.x + imagesPanelScrollOffset.x),
-                @floatToInt(i32, imagesPanel.y + imagesPanelScrollOffset.y),
-                @floatToInt(i32, imagesPanelContentRec.width),
-                @floatToInt(i32, imagesPanelContentRec.height),
+                @floatToInt(i32, panel.size.x + panel.scrollOffset.x),
+                @floatToInt(i32, panel.size.y + panel.scrollOffset.y),
+                @floatToInt(i32, panel.contentSize.width),
+                @floatToInt(i32, panel.contentSize.height),
                 rl.Fade(rl.RED, 0.1),
             );
         }
