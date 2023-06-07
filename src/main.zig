@@ -17,8 +17,6 @@ pub const rl = @cImport({
     @cInclude("raygui.h");
 });
 
-var filePath: [256]u8 = [1]u8{0} ** 256;
-
 const image_box = struct {
     const offset = 8;
 
@@ -84,7 +82,7 @@ pub fn run() !void {
                 const droppedFiles = rl.LoadDroppedFiles();
                 defer rl.UnloadDroppedFiles(droppedFiles);
 
-                for (0..droppedFiles.count) |_| {
+                for (0..droppedFiles.count) |i| {
                     var box = try panel.boxes.addOne();
                     box.size = .{
                         .x = 12,
@@ -94,7 +92,7 @@ pub fn run() !void {
                     };
                     box.panelOffset = .{ .x = panel.size.x, .y = panel.size.y };
 
-                    _ = rl.TextCopy(box.filename[0..].ptr, droppedFiles.paths[0]);
+                    _ = rl.TextCopy(box.filename[0..].ptr, droppedFiles.paths[i]);
                 }
 
                 makeImageVisible = true;
@@ -126,8 +124,6 @@ pub fn run() !void {
                     for (panel.boxes.items) |box| {
                         box.draw(panel.scrollOffset);
                     }
-
-                    // panel.boxes.getLast().draw(panel.scrollOffset);
                 } else {
                     rl.DrawText(
                         "Drop your files\nTo this window!",
