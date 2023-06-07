@@ -17,16 +17,26 @@ pub const rl = @cImport({
     @cInclude("raygui.h");
 });
 
+var filePath: [256]u8 = [1]u8{0} ** 256;
+
 pub fn run() !void {
     const screenWidth = 816;
     const screenHeight = 528;
+
+    var makeImageVisible = false;
 
     rl.InitWindow(screenWidth, screenHeight, "BlendImages");
     defer rl.CloseWindow();
 
     const imagesPanel: rl.Rectangle = .{ .x = 552, .y = 24, .width = 240, .height = 480 };
     var imagesPanelBoundsOffset = rl.Vector2{ .x = 4, .y = 4 };
-    var imagesPanelContentRec: rl.Rectangle = .{ .x = imagesPanel.x, .y = imagesPanel.y, .width = imagesPanel.width - imagesPanelBoundsOffset.x, .height = imagesPanel.height - imagesPanelBoundsOffset.y };
+    var imagesPanelContentRec: rl.Rectangle = .{
+        .x = imagesPanel.x,
+        .y = imagesPanel.y,
+        .width = imagesPanel.width - imagesPanelBoundsOffset.x,
+        // .height = 4,
+        .height = imagesPanel.height - imagesPanelBoundsOffset.y,
+    };
     var imagesPanelScrollView = rl.Rectangle{ .x = 0, .y = 0, .width = 0, .height = 0 };
     var imagesPanelScrollOffset = rl.Vector2{ .x = 0, .y = 0 };
 
@@ -40,7 +50,15 @@ pub fn run() !void {
 
     while (!rl.WindowShouldClose()) {
         { // Update
+            const mousePos = rl.GetMousePosition();
+            if (rl.CheckCollisionPointRec(mousePos, imagesPanel) and rl.IsFileDropped()) {
+                const droppedFiles = rl.LoadDroppedFiles();
+                defer rl.UnloadDroppedFiles(droppedFiles);
 
+                _ = rl.TextCopy(filePath[0..].ptr, droppedFiles.paths[0]);
+
+                makeImageVisible = true;
+            }
         }
 
         { // Draw
@@ -64,18 +82,28 @@ pub fn run() !void {
 
                 defer rl.EndScissorMode();
 
-                _ = rl.GuiGroupBox(.{
-                    .x = imageBox.x + imagesPanel.x + imagesPanelScrollOffset.x,
-                    .y = imageBox.y + imagesPanel.y + imagesPanelScrollOffset.y,
-                    .width = imageBox.width,
-                    .height = imageBox.height,
-                }, "ImageFileName.ext");
-                _ = rl.GuiPanel(.{
-                    .x = imagePanel.x + imagesPanel.x + imagesPanelScrollOffset.x,
-                    .y = imagePanel.y + imagesPanel.y + imagesPanelScrollOffset.y,
-                    .width = imagePanel.width,
-                    .height = imagePanel.height,
-                }, null);
+                if (makeImageVisible) {
+                    _ = rl.GuiGroupBox(.{
+                        .x = imageBox.x + imagesPanel.x + imagesPanelScrollOffset.x,
+                        .y = imageBox.y + imagesPanel.y + imagesPanelScrollOffset.y,
+                        .width = imageBox.width,
+                        .height = imageBox.height,
+                    }, filePath[0..].ptr);
+                    _ = rl.GuiPanel(.{
+                        .x = imagePanel.x + imagesPanel.x + imagesPanelScrollOffset.x,
+                        .y = imagePanel.y + imagesPanel.y + imagesPanelScrollOffset.y,
+                        .width = imagePanel.width,
+                        .height = imagePanel.height,
+                    }, null);
+                } else {
+                    rl.DrawText(
+                        "Drop your files\nTo this window!",
+                        @floatToInt(i32, 30 + imageBox.x + imagesPanel.x + imagesPanelScrollOffset.x),
+                        @floatToInt(i32, imagesPanel.height / 2 + imageBox.y + imagesPanel.y + imagesPanelScrollOffset.y - 40),
+                        20,
+                        rl.DARKGRAY,
+                    );
+                }
             }
 
             rl.DrawRectangle(
