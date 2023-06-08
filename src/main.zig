@@ -38,12 +38,18 @@ const image_box = struct {
             .width = self.size.width - 2 * offset,
             .height = self.size.height - 2 * offset,
         }, null);
-        _ = rl.DrawTexture(
-            self.texture,
-            @floatToInt(i32, self.size.x + offset + self.panelOffset.x + scolloffset.x),
-            @floatToInt(i32, self.size.y + offset + self.panelOffset.y + scolloffset.y),
-            rl.WHITE,
-        );
+
+        _ = rl.DrawTexturePro(self.texture, .{
+            .x = 0,
+            .y = 0,
+            .width = @intToFloat(f32, self.texture.width),
+            .height = @intToFloat(f32, self.texture.height),
+        }, .{
+            .x = self.size.x + offset + self.panelOffset.x + scolloffset.x,
+            .y = self.size.y + offset + self.panelOffset.y + scolloffset.y,
+            .width = self.size.width - 2 * offset,
+            .height = self.size.height - 2 * offset,
+        }, .{ .x = 0, .y = 0 }, 0, rl.WHITE);
     }
 };
 
@@ -100,9 +106,9 @@ pub fn run() !void {
 
                 for (0..droppedFiles.count) |i| {
                     var image: rl.Image = rl.LoadImage(droppedFiles.paths[i]);
-                    if (image.data) |_| {
-                        defer rl.UnloadImage(image);
+                    defer rl.UnloadImage(image);
 
+                    if (image.data) |_| {
                         var box: *image_box = try panel.boxes.addOne();
                         box.size = .{
                             .x = 12,
@@ -110,14 +116,13 @@ pub fn run() !void {
                             .width = 216,
                             .height = 120,
                         };
+                        box.texture = rl.LoadTextureFromImage(image);
+
                         box.panelOffset = .{ .x = panel.size.x, .y = panel.size.y };
 
                         _ = rl.TextCopy(box.filename[0..].ptr, droppedFiles.paths[i]);
 
                         panel.contentSize.height += box.size.height + 8;
-
-                        rl.ImageResize(&image, @floatToInt(i32, box.size.width - 16), @floatToInt(i32, box.size.height - 16));
-                        box.texture = rl.LoadTextureFromImage(image);
 
                         makeImageVisible = true;
                     }
