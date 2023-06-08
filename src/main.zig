@@ -33,34 +33,34 @@ const images_panel = struct {
     boxes: std.ArrayList(image_box),
 
     fn draw(self: @This()) void {
-        for (self.boxes) |box| {
+        for (self.boxes.items) |box| {
             _ = rl.GuiGroupBox(.{
-                .x = self.size.x + box.size.x + self.scolloffset.x,
-                .y = self.size.y + box.size.y + self.scolloffset.y,
-                .width = self.size.width,
-                .height = self.size.height,
-            }, self.filename[0..].ptr);
+                .x = self.size.x + box.size.x + self.scrollOffset.x,
+                .y = self.size.y + box.size.y + self.scrollOffset.y,
+                .width = box.size.width,
+                .height = box.size.height,
+            }, box.filename[0..].ptr);
             
             _ = rl.GuiPanel(.{
-                .x = self.size.x + box.size.x + offset + self.scolloffset.x,
-                .y = self.size.y + box.size.y + offset + self.scolloffset.y,
-                .width = self.size.width - 2 * offset,
-                .height = self.size.height - 2 * offset,
+                .x = self.size.x + box.size.x + offset + self.scrollOffset.x,
+                .y = self.size.y + box.size.y + offset + self.scrollOffset.y,
+                .width = box.size.width - 2 * offset,
+                .height = box.size.height - 2 * offset,
             }, null);
 
             _ = rl.DrawTexturePro(
-                self.texture,
+                box.texture,
                 .{
                     .x = 0,
                     .y = 0,
-                    .width = @intToFloat(f32, self.texture.width),
-                    .height = @intToFloat(f32, self.texture.height),
+                    .width = @intToFloat(f32, box.texture.width),
+                    .height = @intToFloat(f32, box.texture.height),
                 },
                 .{
-                    .x = self.size.x + box.size.x + offset + self.scolloffset.x,
-                    .y = self.size.y + box.size.y + offset + self.scolloffset.y,
-                    .width = self.size.width - 2 * offset,
-                    .height = self.size.height - 2 * offset,
+                    .x = self.size.x + box.size.x + offset + self.scrollOffset.x,
+                    .y = self.size.y + box.size.y + offset + self.scrollOffset.y,
+                    .width = box.size.width - 2 * offset,
+                    .height = box.size.height - 2 * offset,
                 },
                 .{ .x = 0, .y = 0 },
                 0,
@@ -164,7 +164,7 @@ pub fn run() !void {
                     panel.draw();
                 } else {
                     rl.DrawText(
-                        "Drop your files\nTo this window!",
+                        "Drop your images\nin this area!",
                         @floatToInt(i32, 30 + panel.size.x + panel.scrollOffset.x),
                         @floatToInt(i32, panel.size.height / 2 + panel.size.y + panel.scrollOffset.y - 40),
                         20,
