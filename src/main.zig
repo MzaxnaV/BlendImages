@@ -18,47 +18,56 @@ pub const rl = @cImport({
 });
 
 const image_box = struct {
-    const offset = 8;
-
     size: rl.Rectangle,
-    panelOffset: rl.Vector2,
     texture: rl.Texture2D,
     filename: [256]u8,
-
-    fn draw(self: @This(), scolloffset: rl.Vector2) void {
-        _ = rl.GuiGroupBox(.{
-            .x = self.size.x + self.panelOffset.x + scolloffset.x,
-            .y = self.size.y + self.panelOffset.y + scolloffset.y,
-            .width = self.size.width,
-            .height = self.size.height,
-        }, self.filename[0..].ptr);
-        _ = rl.GuiPanel(.{
-            .x = self.size.x + offset + self.panelOffset.x + scolloffset.x,
-            .y = self.size.y + offset + self.panelOffset.y + scolloffset.y,
-            .width = self.size.width - 2 * offset,
-            .height = self.size.height - 2 * offset,
-        }, null);
-
-        _ = rl.DrawTexturePro(self.texture, .{
-            .x = 0,
-            .y = 0,
-            .width = @intToFloat(f32, self.texture.width),
-            .height = @intToFloat(f32, self.texture.height),
-        }, .{
-            .x = self.size.x + offset + self.panelOffset.x + scolloffset.x,
-            .y = self.size.y + offset + self.panelOffset.y + scolloffset.y,
-            .width = self.size.width - 2 * offset,
-            .height = self.size.height - 2 * offset,
-        }, .{ .x = 0, .y = 0 }, 0, rl.WHITE);
-    }
 };
 
 const images_panel = struct {
+    const offset = 8;
+
     size: rl.Rectangle,
     contentSize: rl.Rectangle,
     scrollOffset: rl.Vector2,
     scrollView: rl.Rectangle,
     boxes: std.ArrayList(image_box),
+
+    fn draw(self: @This()) void {
+        for (self.boxes) |box| {
+            _ = rl.GuiGroupBox(.{
+                .x = self.size.x + box.size.x + self.scolloffset.x,
+                .y = self.size.y + box.size.y + self.scolloffset.y,
+                .width = self.size.width,
+                .height = self.size.height,
+            }, self.filename[0..].ptr);
+            
+            _ = rl.GuiPanel(.{
+                .x = self.size.x + box.size.x + offset + self.scolloffset.x,
+                .y = self.size.y + box.size.y + offset + self.scolloffset.y,
+                .width = self.size.width - 2 * offset,
+                .height = self.size.height - 2 * offset,
+            }, null);
+
+            _ = rl.DrawTexturePro(
+                self.texture,
+                .{
+                    .x = 0,
+                    .y = 0,
+                    .width = @intToFloat(f32, self.texture.width),
+                    .height = @intToFloat(f32, self.texture.height),
+                },
+                .{
+                    .x = self.size.x + box.size.x + offset + self.scolloffset.x,
+                    .y = self.size.y + box.size.y + offset + self.scolloffset.y,
+                    .width = self.size.width - 2 * offset,
+                    .height = self.size.height - 2 * offset,
+                },
+                .{ .x = 0, .y = 0 },
+                0,
+                rl.WHITE,
+            );
+        }
+    }
 };
 
 pub fn run() !void {
@@ -118,9 +127,9 @@ pub fn run() !void {
                         };
                         box.texture = rl.LoadTextureFromImage(image);
 
-                        box.panelOffset = .{ .x = panel.size.x, .y = panel.size.y };
-
-                        _ = rl.TextCopy(box.filename[0..].ptr, droppedFiles.paths[i]);
+                        var count = @as(i32, 0);
+                        var splits = rl.TextSplit(droppedFiles.paths[i], '\\', &count);
+                        _ = rl.TextCopy(box.filename[0..].ptr, splits[@intCast(u32, count - 1)]);
 
                         panel.contentSize.height += box.size.height + 8;
 
@@ -152,9 +161,7 @@ pub fn run() !void {
                 defer rl.EndScissorMode();
 
                 if (makeImageVisible) {
-                    for (panel.boxes.items) |box| {
-                        box.draw(panel.scrollOffset);
-                    }
+                    panel.draw();
                 } else {
                     rl.DrawText(
                         "Drop your files\nTo this window!",
