@@ -22,6 +22,7 @@ const image_box = struct {
 
     size: rl.Rectangle,
     panelOffset: rl.Vector2,
+    texture: rl.Texture2D,
     filename: [256]u8,
 
     fn draw(self: @This(), scolloffset: rl.Vector2) void {
@@ -37,6 +38,12 @@ const image_box = struct {
             .width = self.size.width - 2 * offset,
             .height = self.size.height - 2 * offset,
         }, null);
+        _ = rl.DrawTexture(
+            self.texture,
+            @floatToInt(i32, self.size.x + offset + self.panelOffset.x + scolloffset.x),
+            @floatToInt(i32, self.size.y + offset + self.panelOffset.y + scolloffset.y),
+            rl.WHITE,
+        );
     }
 };
 
@@ -52,8 +59,12 @@ pub fn run() !void {
     const screenWidth = 816;
     const screenHeight = 528;
 
-    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
-    defer if (gpa.deinit() == .leak) std.debug.print("LEAKING MEMORY!", .{});
+    // var gpa = std.heap.GeneralPurposeAllocator(.{}){};
+    // defer if (gpa.deinit() == .leak) std.debug.print("LEAKING MEMORY!", .{});
+
+    var gpa = std.heap.ArenaAllocator.init(std.heap.c_allocator);
+    defer gpa.deinit();
+
     const allocator = gpa.allocator();
 
     var makeImageVisible = false;
@@ -68,7 +79,12 @@ pub fn run() !void {
         .scrollOffset = .{ .x = 0, .y = 0 },
         .scrollView = .{ .x = 0, .y = 0, .width = 0, .height = 0 },
     };
-    defer panel.boxes.deinit();
+    defer {
+        for (panel.boxes.items[0..]) |imagebox| {
+            rl.UnloadTexture(imagebox.texture);
+        }
+        panel.boxes.deinit();
+    }
 
     const previewBox: rl.Rectangle = .{ .x = 24, .y = 24, .width = 504, .height = 480 };
     const previewPanel: rl.Rectangle = .{ .x = 32, .y = 32, .width = 488, .height = 464 };
@@ -83,21 +99,29 @@ pub fn run() !void {
                 defer rl.UnloadDroppedFiles(droppedFiles);
 
                 for (0..droppedFiles.count) |i| {
-                    var box = try panel.boxes.addOne();
-                    box.size = .{
-                        .x = 12,
-                        .y = 12 + @intToFloat(f32, panel.boxes.items.len - 1) * 128,
-                        .width = 216,
-                        .height = 120,
-                    };
-                    box.panelOffset = .{ .x = panel.size.x, .y = panel.size.y };
+                    var image: rl.Image = rl.LoadImage(droppedFiles.paths[i]);
+                    if (image.data) |_| {
+                        defer rl.UnloadImage(image);
 
-                    _ = rl.TextCopy(box.filename[0..].ptr, droppedFiles.paths[i]);
+                        var box: *image_box = try panel.boxes.addOne();
+                        box.size = .{
+                            .x = 12,
+                            .y = 12 + @intToFloat(f32, panel.boxes.items.len - 1) * 128,
+                            .width = 216,
+                            .height = 120,
+                        };
+                        box.panelOffset = .{ .x = panel.size.x, .y = panel.size.y };
 
-                    panel.contentSize.height += box.size.height + 8;
+                        _ = rl.TextCopy(box.filename[0..].ptr, droppedFiles.paths[i]);
+
+                        panel.contentSize.height += box.size.height + 8;
+
+                        rl.ImageResize(&image, @floatToInt(i32, box.size.width - 16), @floatToInt(i32, box.size.height - 16));
+                        box.texture = rl.LoadTextureFromImage(image);
+
+                        makeImageVisible = true;
+                    }
                 }
-
-                makeImageVisible = true;
             }
         }
 
