@@ -30,11 +30,11 @@ pub fn run() !void {
         rl.ImageDraw(
             &parrots,
             cat,
-            .{ .x = 0, .y = 0, .width = @intToFloat(f32, cat.width), .height = @intToFloat(f32, cat.height) },
-            .{ .x = 30, .y = 40, .width = @intToFloat(f32, cat.width) * 1.5, .height = @intToFloat(f32, cat.height) * 1.5 },
+            .{ .x = 0, .y = 0, .width = @as(f32, @floatFromInt(cat.width)), .height = @as(f32, @floatFromInt(cat.height)) },
+            .{ .x = 30, .y = 40, .width = @as(f32, @floatFromInt(cat.width)) * 1.5, .height = @as(f32, @floatFromInt(cat.height)) * 1.5 },
             rl.WHITE,
         );
-        rl.ImageCrop(&parrots, .{ .x = 0, .y = 50, .width = @intToFloat(f32, parrots.width), .height = @intToFloat(f32, parrots.height) - 100 });
+        rl.ImageCrop(&parrots, .{ .x = 0, .y = 50, .width = @as(f32, @floatFromInt(parrots.width)), .height = @as(f32, @floatFromInt(parrots.height)) - 100 });
 
         rl.ImageDrawPixel(&parrots, 10, 10, rl.RAYWHITE);
         rl.ImageDrawCircleLines(&parrots, 10, 10, 5, rl.RAYWHITE);
@@ -43,7 +43,7 @@ pub fn run() !void {
         const font = rl.LoadFont(resources ++ "custom_jupiter_crash.png");
         defer rl.UnloadFont(font);
 
-        rl.ImageDrawTextEx(&parrots, font, "PARROTS & CAT", .{ .x = 300, .y = 230 }, @intToFloat(f32, font.baseSize), -2, rl.WHITE);
+        rl.ImageDrawTextEx(&parrots, font, "PARROTS & CAT", .{ .x = 300, .y = 230 }, @as(f32, @floatFromInt(font.baseSize)), -2, rl.WHITE);
 
         texture = rl.LoadTextureFromImage(parrots);
     }

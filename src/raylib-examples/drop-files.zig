@@ -71,12 +71,12 @@ pub fn run() !void {
                 rl.DrawText("Dropped Files:", 100, 40, 20, rl.DARKGRAY);
 
                 for (0..files.counter) |i| {
-                    rl.DrawRectangle(0, 85 + 40 * @intCast(i32, i), screenWidth, 40, rl.Fade(rl.LIGHTGRAY, if (i % 2 == 0) 0.5 else 0.3));
+                    rl.DrawRectangle(0, 85 + 40 * @as(i32, @intCast(i)), screenWidth, 40, rl.Fade(rl.LIGHTGRAY, if (i % 2 == 0) 0.5 else 0.3));
 
-                    rl.DrawText(files.paths[i].ptr, 120, 100 + 40 * @intCast(i32, i), 10, rl.GRAY);
+                    rl.DrawText(files.paths[i].ptr, 120, 100 + 40 * @as(i32, @intCast(i)), 10, rl.GRAY);
                 }
 
-                rl.DrawText("Drop new files ...", 100, 110 + 40 * @intCast(i32, files.counter), 20, rl.DARKGRAY);
+                rl.DrawText("Drop new files ...", 100, 110 + 40 * @as(i32, @intCast(files.counter)), 20, rl.DARKGRAY);
             }
         }
     }

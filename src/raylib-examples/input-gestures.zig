@@ -76,9 +76,9 @@ pub fn run() !void {
 
             var i = @as(u32, 0);
             while (i < gesture.count) : (i += 1) {
-                rl.DrawRectangle(10, 30 + 20 * @intCast(i32, i), 200, 20, rl.Fade(rl.LIGHTGRAY, if (i % 2 == 0) 0.5 else 0.3));
+                rl.DrawRectangle(10, 30 + 20 * @as(i32, @intCast(i)), 200, 20, rl.Fade(rl.LIGHTGRAY, if (i % 2 == 0) 0.5 else 0.3));
 
-                rl.DrawText(&gesture.strings[i], 35, 36 + 20 * @intCast(i32, i), 10, if (i < gesture.count - 1) rl.DARKGRAY else rl.MAROON);
+                rl.DrawText(&gesture.strings[i], 35, 36 + 20 * @as(i32, @intCast(i)), 10, if (i < gesture.count - 1) rl.DARKGRAY else rl.MAROON);
             }
 
             rl.DrawRectangleLines(10, 29, 200, screenHeight - 50, rl.GRAY);

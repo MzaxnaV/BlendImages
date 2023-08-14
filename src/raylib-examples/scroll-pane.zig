@@ -28,7 +28,7 @@ fn DrawStyleEditControls() void {
     _ = rl.GuiCheckBox(
         .{ .x = 565, .y = 280, .width = 20, .height = 20 },
         "ARROWS_VISIBLE",
-        @ptrCast(*bool, &scrollbarArrows), // TODO: hacky \(_-_)/
+        @as(*bool, @ptrCast(&scrollbarArrows)), // TODO: hacky \(_-_)/
     );
     _ = rl.GuiSetStyle(rl.SCROLLBAR, rl.ARROWS_VISIBLE, scrollbarArrows);
 
@@ -45,7 +45,7 @@ fn DrawStyleEditControls() void {
     const text = if (rl.GuiGetStyle(rl.LISTVIEW, rl.SCROLLBAR_SIDE) == rl.SCROLLBAR_LEFT_SIDE) "SCROLLBAR: LEFT" else "SCROLLBAR: RIGHT";
     var toggleScrollBarSide = rl.GuiGetStyle(rl.LISTVIEW, rl.SCROLLBAR_SIDE) != 0;
     _ = rl.GuiToggle(.{ .x = 560, .y = 110, .width = 200, .height = 35 }, text, &toggleScrollBarSide);
-    _ = rl.GuiSetStyle(rl.LISTVIEW, rl.SCROLLBAR_SIDE, @as(i32, @boolToInt(toggleScrollBarSide)));
+    _ = rl.GuiSetStyle(rl.LISTVIEW, rl.SCROLLBAR_SIDE, @as(i32, @intFromBool(toggleScrollBarSide)));
 }
 
 pub fn run() !void {
@@ -81,7 +81,7 @@ pub fn run() !void {
             _ = rl.GuiScrollPanel(panelRec, null, panelContentRec, &panelScroll, &panelView);
 
             {
-                rl.BeginScissorMode(@floatToInt(i32, panelView.x), @floatToInt(i32, panelView.y), @floatToInt(i32, panelView.width), @floatToInt(i32, panelView.height));
+                rl.BeginScissorMode(@as(i32, @intFromFloat(panelView.x)), @as(i32, @intFromFloat(panelView.y)), @as(i32, @intFromFloat(panelView.width)), @as(i32, @intFromFloat(panelView.height)));
                 defer rl.EndScissorMode();
 
                 _ = rl.GuiGrid(.{
@@ -94,10 +94,10 @@ pub fn run() !void {
 
             if (showContentArea) {
                 rl.DrawRectangle(
-                    @floatToInt(i32, panelRec.x + panelScroll.x),
-                    @floatToInt(i32, panelRec.y + panelScroll.y),
-                    @floatToInt(i32, panelContentRec.width),
-                    @floatToInt(i32, panelContentRec.height),
+                    @as(i32, @intFromFloat(panelRec.x + panelScroll.x)),
+                    @as(i32, @intFromFloat(panelRec.y + panelScroll.y)),
+                    @as(i32, @intFromFloat(panelContentRec.width)),
+                    @as(i32, @intFromFloat(panelContentRec.height)),
                     rl.Fade(rl.RED, 0.1),
                 );
             }
@@ -106,8 +106,8 @@ pub fn run() !void {
 
             _ = rl.GuiCheckBox(.{ .x = 545, .y = 80, .width = 20, .height = 20 }, "SHOW CONTENT AREA", &showContentArea);
 
-            _ = rl.GuiSliderBar(.{ .x = 590, .y = 385, .width = 145, .height = 15 }, "WIDTH", rl.TextFormat("%i", @floatToInt(i32, panelContentRec.width)), &panelContentRec.width, 1, 600);
-            _ = rl.GuiSliderBar(.{ .x = 590, .y = 410, .width = 145, .height = 15 }, "HEIGHT", rl.TextFormat("%i", @floatToInt(i32, panelContentRec.height)), &panelContentRec.height, 1, 400);
+            _ = rl.GuiSliderBar(.{ .x = 590, .y = 385, .width = 145, .height = 15 }, "WIDTH", rl.TextFormat("%i", @as(i32, @intFromFloat(panelContentRec.width))), &panelContentRec.width, 1, 600);
+            _ = rl.GuiSliderBar(.{ .x = 590, .y = 410, .width = 145, .height = 15 }, "HEIGHT", rl.TextFormat("%i", @as(i32, @intFromFloat(panelContentRec.height))), &panelContentRec.height, 1, 400);
         }
     }
 }

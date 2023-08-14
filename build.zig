@@ -17,7 +17,7 @@ pub fn build(b: *std.Build) void {
     // set a preferred release mode, allowing the user to decide how to optimize.
     const optimize = b.standardOptimizeOption(.{});
 
-    const raylib = raylib_build.addRaylib(b, target, optimize);
+    const raylib = raylib_build.addRaylib(b, target, optimize, .{});
 
     const exe = b.addExecutable(.{
         .name = "BlendImages",
@@ -28,9 +28,8 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
 
-    exe.addIncludePath("libs/raygui/src");
-    exe.addIncludePath("libs/raylib/src");
-
+    exe.addIncludePath(.{ .path = "libs/raygui/src" });
+    exe.addIncludePath(.{ .path = "libs/raylib/src" });
 
     exe.linkLibrary(raylib);
 

@@ -50,8 +50,8 @@ const images_panel = struct {
             }, null);
 
             _ = rl.DrawTextureV(box.previewTexture, .{
-                .x = self.size.x + box.size.x + (box.size.width - @intToFloat(f32, box.previewTexture.width)) / 2 + self.scrollOffset.x,
-                .y = self.size.y + box.size.y + (box.size.height - @intToFloat(f32, box.previewTexture.height)) / 2 + self.scrollOffset.y,
+                .x = self.size.x + box.size.x + (box.size.width - @as(f32, @floatFromInt(box.previewTexture.width))) / 2 + self.scrollOffset.x,
+                .y = self.size.y + box.size.y + (box.size.height - @as(f32, @floatFromInt(box.previewTexture.height))) / 2 + self.scrollOffset.y,
             }, rl.WHITE);
         }
     }
@@ -105,8 +105,8 @@ pub fn run() !void {
     };
 
     previewPanel.texture = rl.LoadTextureFromImage(rl.GenImageChecked(
-        @floatToInt(i32, previewPanel.content.width),
-        @floatToInt(i32, previewPanel.content.height),
+        @as(i32, @intFromFloat(previewPanel.content.width)),
+        @as(i32, @intFromFloat(previewPanel.content.height)),
         32,
         32,
         rl.GRAY,
@@ -133,13 +133,13 @@ pub fn run() !void {
                             var box: *image_box = try panel.boxes.addOne();
                             box.size = .{
                                 .x = 12,
-                                .y = 12 + @intToFloat(f32, panel.boxes.items.len - 1) * 128,
+                                .y = 12 + @as(f32, @floatFromInt(panel.boxes.items.len - 1)) * 128,
                                 .width = 216,
                                 .height = 120,
                             };
 
-                            const width = @intToFloat(f32, image.width);
-                            const height = @intToFloat(f32, image.height);
+                            const width = @as(f32, @floatFromInt(image.width));
+                            const height = @as(f32, @floatFromInt(image.height));
                             const containerWidth = (box.size.width - 2 * (images_panel.offset + 1));
                             const containerHeight = (box.size.height - 2 * (images_panel.offset + 1));
 
@@ -158,13 +158,13 @@ pub fn run() !void {
                                 scale_w = scale_h;
                             }
 
-                            rl.ImageResize(&image, @floatToInt(i32, width * scale_w), @floatToInt(i32, height * scale_h));
+                            rl.ImageResize(&image, @as(i32, @intFromFloat(width * scale_w)), @as(i32, @intFromFloat(height * scale_h)));
 
                             box.previewTexture = rl.LoadTextureFromImage(image);
 
                             var count = @as(i32, 0);
                             var splits = rl.TextSplit(droppedFiles.paths[i], '\\', &count);
-                            _ = rl.TextCopy(box.filename[0..].ptr, splits[@intCast(u32, count - 1)]);
+                            _ = rl.TextCopy(box.filename[0..].ptr, splits[@as(u32, @intCast(count - 1))]);
 
                             panel.contentSize.height += box.size.height + 8;
 
@@ -186,13 +186,13 @@ pub fn run() !void {
             rl.BeginDrawing();
             defer rl.EndDrawing();
 
-            rl.ClearBackground(rl.GetColor(@bitCast(u32, rl.GuiGetStyle(rl.DEFAULT, rl.BACKGROUND_COLOR))));
+            rl.ClearBackground(rl.GetColor(@as(u32, @bitCast(rl.GuiGetStyle(rl.DEFAULT, rl.BACKGROUND_COLOR)))));
 
             _ = rl.GuiGroupBox(previewPanel.size, "Preview");
             _ = rl.GuiPanel(previewPanel.content, null);
 
             // temporarily crop the preview texture
-            if (previewPanel.texture.width > @floatToInt(i32, previewPanel.content.width) or previewPanel.texture.height > @floatToInt(i32, previewPanel.content.height)) {
+            if (previewPanel.texture.width > @as(i32, @intFromFloat(previewPanel.content.width)) or previewPanel.texture.height > @as(i32, @intFromFloat(previewPanel.content.height))) {
                 _ = rl.DrawTextureRec(
                     previewPanel.texture,
                     .{ .x = 0, .y = 0, .width = previewPanel.content.width, .height = previewPanel.content.height },
@@ -200,17 +200,17 @@ pub fn run() !void {
                     rl.WHITE,
                 );
             } else {
-                _ = rl.DrawTexture(previewPanel.texture, @floatToInt(i32, previewPanel.content.x), @floatToInt(i32, previewPanel.content.y), rl.WHITE);
+                _ = rl.DrawTexture(previewPanel.texture, @as(i32, @intFromFloat(previewPanel.content.x)), @as(i32, @intFromFloat(previewPanel.content.y)), rl.WHITE);
             }
 
             _ = rl.GuiScrollPanel(panel.size, null, panel.contentSize, &panel.scrollOffset, &panel.scrollView);
 
             {
                 rl.BeginScissorMode(
-                    @floatToInt(i32, panel.size.x),
-                    @floatToInt(i32, panel.size.y + 1),
-                    @floatToInt(i32, panel.size.width - 12),
-                    @floatToInt(i32, panel.size.height - 14),
+                    @as(i32, @intFromFloat(panel.size.x)),
+                    @as(i32, @intFromFloat(panel.size.y + 1)),
+                    @as(i32, @intFromFloat(panel.size.width - 12)),
+                    @as(i32, @intFromFloat(panel.size.height - 14)),
                 );
 
                 defer rl.EndScissorMode();
@@ -219,8 +219,8 @@ pub fn run() !void {
                     status.invisible => {
                         rl.DrawText(
                             "Drop your images\nin this area!",
-                            @floatToInt(i32, 30 + panel.size.x + panel.scrollOffset.x),
-                            @floatToInt(i32, panel.size.height / 2 + panel.size.y + panel.scrollOffset.y - 40),
+                            @as(i32, @intFromFloat(30 + panel.size.x + panel.scrollOffset.x)),
+                            @as(i32, @intFromFloat(panel.size.height / 2 + panel.size.y + panel.scrollOffset.y - 40)),
                             20,
                             rl.DARKGRAY,
                         );
@@ -229,8 +229,8 @@ pub fn run() !void {
                     status.not_supported => {
                         rl.DrawText(
                             "Format Not Supported\nDrop your images\nin this area!",
-                            @floatToInt(i32, 30 + panel.size.x + panel.scrollOffset.x),
-                            @floatToInt(i32, panel.size.height / 2 + panel.size.y + panel.scrollOffset.y - 40),
+                            @as(i32, @intFromFloat(30 + panel.size.x + panel.scrollOffset.x)),
+                            @as(i32, @intFromFloat(panel.size.height / 2 + panel.size.y + panel.scrollOffset.y - 40)),
                             20,
                             rl.DARKGRAY,
                         );
@@ -240,10 +240,10 @@ pub fn run() !void {
 
             if (DEBUG) {
                 rl.DrawRectangle(
-                    @floatToInt(i32, panel.size.x + panel.scrollOffset.x),
-                    @floatToInt(i32, panel.size.y + panel.scrollOffset.y),
-                    @floatToInt(i32, panel.contentSize.width),
-                    @floatToInt(i32, panel.contentSize.height),
+                    @as(i32, @intFromFloat(panel.size.x + panel.scrollOffset.x)),
+                    @as(i32, @intFromFloat(panel.size.y + panel.scrollOffset.y)),
+                    @as(i32, @intFromFloat(panel.contentSize.width)),
+                    @as(i32, @intFromFloat(panel.contentSize.height)),
                     rl.Fade(rl.RED, 0.1),
                 );
             }
