@@ -49,7 +49,7 @@ pub fn run() !void {
                 defer rl.UnloadDroppedFiles(droppedFiles);
 
                 var i = @as(u32, 0);
-                var offset = files.counter;
+                const offset = files.counter;
                 while (i < droppedFiles.count) : (i += 1) {
                     if (files.counter < (MAX_FILEPATH_RECORDED - 1)) {
                         _ = rl.TextCopy(files.paths[offset + i].ptr, droppedFiles.paths[i]);

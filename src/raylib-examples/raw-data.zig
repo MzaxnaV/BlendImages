@@ -47,7 +47,7 @@ pub fn run() !void {
             }
         }
 
-        var checkedIm = rl.Image{
+        const checkedIm = rl.Image{
             .data = pixels.ptr,
             .width = width,
             .height = height,

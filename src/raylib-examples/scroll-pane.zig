@@ -2,7 +2,6 @@ const std = @import("std");
 
 pub const rl = @cImport({
     @cInclude("raylib.h");
-    @cDefine("RAYGUI_IMPLEMENTATION", {});
     @cInclude("raygui.h");
 });
 
@@ -55,7 +54,7 @@ pub fn run() !void {
     rl.InitWindow(screenWidth, screenHeight, "raygui - GuiScrollPanel()");
     defer rl.CloseWindow();
 
-    var panelRec = rl.Rectangle{ .x = 20, .y = 40, .width = 200, .height = 150 };
+    const panelRec = rl.Rectangle{ .x = 20, .y = 40, .width = 200, .height = 150 };
     var panelContentRec = rl.Rectangle{ .x = 0, .y = 0, .width = 340, .height = 340 };
 
     var panelView = rl.Rectangle{ .x = 0, .y = 0, .width = 0, .height = 0 };

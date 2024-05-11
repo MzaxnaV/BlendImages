@@ -21,7 +21,7 @@ pub fn run() !void {
     defer rl.CloseWindow();
 
     var touchPosition: rl.Vector2 = .{ .x = 0, .y = 0 };
-    var touchArea = rl.Rectangle{ .x = 220, .y = 10, .width = screenWidth - 230.0, .height = screenHeight - 20.0 };
+    const touchArea = rl.Rectangle{ .x = 220, .y = 10, .width = screenWidth - 230.0, .height = screenHeight - 20.0 };
 
     var gesture: g = .{
         .strings = [1][32]u8{[1]u8{0} ** 32} ** MAX_GESTURE_STRINGS,

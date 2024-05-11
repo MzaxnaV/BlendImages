@@ -4,7 +4,7 @@ pub const rl = @cImport({
     @cInclude("raylib.h");
 });
 
-const resources = "libs/raylib/examples/textures/resources/";
+const resources = "resources/";
 
 pub fn run() !void {
     const screenWidth = 800;
