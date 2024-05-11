@@ -14,7 +14,6 @@ const DEBUG = false;
 pub const rl = @cImport({
     @cInclude("raylib.h");
     @cInclude("raymath.h");
-    @cDefine("RAYGUI_IMPLEMENTATION", {});
     @cInclude("raygui.h");
 });
 
@@ -163,7 +162,7 @@ pub fn run() !void {
                             box.previewTexture = rl.LoadTextureFromImage(image);
 
                             var count = @as(i32, 0);
-                            var splits = rl.TextSplit(droppedFiles.paths[i], '\\', &count);
+                            const splits = rl.TextSplit(droppedFiles.paths[i], '\\', &count);
                             _ = rl.TextCopy(box.filename[0..].ptr, splits[@as(u32, @intCast(count - 1))]);
 
                             panel.contentSize.height += box.size.height + 8;

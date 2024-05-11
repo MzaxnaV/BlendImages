@@ -6,7 +6,10 @@
         {
             "label": "build",
             "type": "shell",
-            "command": "zig build"
+            "command": "zig build",
+            "problemMatcher": [
+                "$zig"
+            ]
         }
     ]
 }
