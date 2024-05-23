@@ -4,12 +4,12 @@
 
     .dependencies = .{
         .raylib = .{
-            .url = "https://github.com/raysan5/raylib/archive/master.tar.gz",
-            .hash = "1220ecda1d7187536df831a947ab76eecde94d5461de802de63963966d250dcf7e25",
+            .url = "https://github.com/raysan5/raylib/archive/d9c5066382615644137b4f65479c65c44820027a.tar.gz",
+            .hash = "12204f4d3c42770ee5a330518eb94f897955df2f564de677d8d77899d3b95780c697",
         },
         .raygui = .{
-            .url = "https://github.com/raysan5/raygui/archive/master.tar.gz",
-            .hash = "12201907b4e593271e6a6c3ba91ee298a6e98393c44404915df022fa0764aa224c7e",
+            .url = "https://github.com/raysan5/raygui/archive/7bb66e5c7f3e283995a43c68965ee82acc65637a.tar.gz",
+            .hash = "1220f32853c2cd598b033ec47530812c90ba8f2580ef27ff9eb8272be82b352d3c32",
         },
     },
 

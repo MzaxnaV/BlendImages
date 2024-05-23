@@ -5,7 +5,10 @@ pub const rl = @cImport({
     @cInclude("raygui.h");
 });
 
-fn DrawStyleEditControls() void {
+fn DrawStyleEditControls() void { // Draw and process scroll bar style edition controls
+
+    // ScrollPanel style controls
+    //----------------------------------------------------------
     _ = rl.GuiGroupBox(.{ .x = 550, .y = 170, .width = 220, .height = 205 }, "SCROLLBAR STYLE");
 
     var style = rl.GuiGetStyle(rl.SCROLLBAR, rl.BORDER_WIDTH);
@@ -45,6 +48,21 @@ fn DrawStyleEditControls() void {
     var toggleScrollBarSide = rl.GuiGetStyle(rl.LISTVIEW, rl.SCROLLBAR_SIDE) != 0;
     _ = rl.GuiToggle(.{ .x = 560, .y = 110, .width = 200, .height = 35 }, text, &toggleScrollBarSide);
     _ = rl.GuiSetStyle(rl.LISTVIEW, rl.SCROLLBAR_SIDE, @as(i32, @intFromBool(toggleScrollBarSide)));
+    //----------------------------------------------------------
+
+    // ScrollBar style controls
+    //----------------------------------------------------------
+    _ = rl.GuiGroupBox(.{ .x = 550, .y = 20, .width = 220, .height = 135 }, "SCROLLPANE STYLE");
+
+    style = rl.GuiGetStyle(rl.LISTVIEW, rl.SCROLLBAR_WIDTH);
+    _ = rl.GuiLabel(.{ .x = 555, .y = 35, .width = 110, .height = 10 }, "SCROLLBAR_WIDTH");
+    _ = rl.GuiSpinner(.{ .x = 670, .y = 30, .width = 90, .height = 20 }, null, &style, 6, 30, false);
+    _ = rl.GuiSetStyle(rl.LISTVIEW, rl.SCROLLBAR_WIDTH, style);
+
+    style = rl.GuiGetStyle(rl.DEFAULT, rl.BORDER_WIDTH);
+    _ = rl.GuiLabel(.{ .x = 555, .y = 60, .width = 110, .height = 10 }, "BORDER_WIDTH");
+    _ = rl.GuiSpinner(.{ .x = 670, .y = 55, .width = 90, .height = 20 }, null, &style, 0, 20, false);
+    _ = rl.GuiSetStyle(rl.LISTVIEW, rl.BORDER_WIDTH, style);
 }
 
 pub fn run() !void {
@@ -103,7 +121,7 @@ pub fn run() !void {
 
             DrawStyleEditControls();
 
-            _ = rl.GuiCheckBox(.{ .x = 545, .y = 80, .width = 20, .height = 20 }, "SHOW CONTENT AREA", &showContentArea);
+            _ = rl.GuiCheckBox(.{ .x = 565, .y = 80, .width = 20, .height = 20 }, "SHOW CONTENT AREA", &showContentArea);
 
             _ = rl.GuiSliderBar(.{ .x = 590, .y = 385, .width = 145, .height = 15 }, "WIDTH", rl.TextFormat("%i", @as(i32, @intFromFloat(panelContentRec.width))), &panelContentRec.width, 1, 600);
             _ = rl.GuiSliderBar(.{ .x = 590, .y = 410, .width = 145, .height = 15 }, "HEIGHT", rl.TextFormat("%i", @as(i32, @intFromFloat(panelContentRec.height))), &panelContentRec.height, 1, 400);

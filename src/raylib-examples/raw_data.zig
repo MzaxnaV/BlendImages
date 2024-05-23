@@ -4,8 +4,6 @@ pub const rl = @cImport({
     @cInclude("raylib.h");
 });
 
-const resources = "libs/raylib/examples/textures/resources/";
-
 pub fn run() !void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     defer if (gpa.deinit() == .leak) std.debug.print("LEAKING MEMORY!", .{});
@@ -15,7 +13,7 @@ pub fn run() !void {
     const screenHeight = 450;
 
     rl.InitWindow(screenWidth, screenHeight, "raylib [textures] example - texture from raw data");
-    defer rl.CloseWindow();
+    defer rl.CloseWindow(); // Close window and OpenGL context
 
     var fudesumi: rl.Texture2D = undefined;
     defer rl.UnloadTexture(fudesumi);
@@ -24,16 +22,21 @@ pub fn run() !void {
     defer rl.UnloadTexture(checked);
 
     {
-        const fudesumiRaw = rl.LoadImageRaw(resources ++ "fudesumi.raw", 384, 521, rl.PIXELFORMAT_UNCOMPRESSED_R8G8B8A8, 0);
+        // something is broken here
+        const fudesumiRaw = rl.LoadImageRaw("resources/fudesumi.raw", 384, 521, rl.PIXELFORMAT_UNCOMPRESSED_R8G8B8A8, 0);
+        std.debug.print("{}\n", .{fudesumiRaw});
+
         defer rl.UnloadImage(fudesumiRaw);
 
         fudesumi = rl.LoadTextureFromImage(fudesumiRaw);
     }
 
     {
+        // Generate a checked texture by code
         const width = 960;
         const height = 480;
 
+        // Dynamic memory allocation to store pixels data (Color type)
         var pixels: []rl.Color = try allocator.alloc(rl.Color, width * height);
         defer allocator.free(pixels);
 
@@ -47,8 +50,9 @@ pub fn run() !void {
             }
         }
 
+        // Load pixels data into an image structure and create texture
         const checkedIm = rl.Image{
-            .data = pixels.ptr,
+            .data = pixels.ptr, // We can assign pixels directly to data
             .width = width,
             .height = height,
             .format = rl.PIXELFORMAT_UNCOMPRESSED_R8G8B8A8,
